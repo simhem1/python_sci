@@ -9,7 +9,7 @@ import numpy as np
 IP = np.zeros((8,8))
 for col in range(0, 8):
     for row in range(0, 8):
-        IP[row][col]=(58-((row>=4)*1)+2*((row-(4*(row>=4)))))-col*8
+        IP[row][col]=(58-((row>=4)*1)+2*(row-(4*(row>=4))))-col*8
 #Create final permutation matrix
 
 IP_inv = np.zeros((8,8))
@@ -78,6 +78,10 @@ Sbox_8 = np.array([[13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7], [1,15,13,8,10,3,7,4,
 #print(np.array(P))
 #print(np.array(Sbox_1))
 
+##Encryption##
+
+#functions used for encryption
+
 # initial permutation
 
 def initPermutation(plaintext):
@@ -90,27 +94,97 @@ def initPermutation(plaintext):
 
 # final permutation
 
-def finalPermutation(input):
+def finalPermutation(output_of_last_round):
     ciphertext = np.zeros((1,64))
     IP_inv_1d=IP_inv.flatten()
     for i in range(0,64):
-        ciphertext[i] = input[IP_inv_1d[i]]
+        ciphertext[i] = output_of_last_round[IP_inv_1d[i]]
     print(ciphertext)
     return ciphertext
 
 # expansion permutation
 # Input:32bit Output:48bit
 
-def expansionPermutation(input):
+def expansionPermutation(input_R_1):
     expanded_input = np.zeros((1,48))
     E_1d = E.flatten()
     for i in range(0,48):
-        expanded_input[i] = input[E_1d[i]]
+        expanded_input[i] = input_R_1[E_1d[i]]
     print(expanded_input)
     return expanded_input
 
+# f-function permutation
 
-##Key Schedule##
+
+def fFunctionPermutation(concatenated_sbox_output):
+    output = np.zeros((1,32))
+    P_1d = P.flatten()
+    for i in range(0,48):
+        output[i] = concatenated_sbox_output[P_1d[i]]
+    print(output)
+    return output
+
+
+#sbox substitution function
+
+    def sbox_substitution(input_sbox, sbox):
+        msb = input_sbox[0]
+        lsb = input_sbox[-1]
+        row = int(str(msb) + str(lsb), 2)
+        col = int(str(input_sbox[1]) + str(input_sbox[2]) + str(input_sbox[3]) + str(input_sbox[4]), 2)
+        if sbox == 1:
+            return bin(Sbox_1[row][col])
+        elif sbox == 2:
+            return bin(Sbox_2[row][col])
+        elif sbox == 3:
+            return bin(Sbox_3[row][col])
+        elif sbox == 4:
+            return bin(Sbox_4[row][col])
+        elif sbox == 5:
+            return bin(Sbox_5[row][col])
+        elif sbox == 6:
+            return bin(Sbox_6[row][col])
+        elif sbox == 7:
+            return bin(Sbox_7[row][col])
+        elif sbox == 8:
+            return bin(Sbox_8[row][col])
+
+
+#fFunction
+
+
+def fFunction(righthalf, k_i, current_round):
+    expanded_righthalf = expansionPermutation(righthalf)
+    temp = expanded_righthalf ^ k_i
+    input_sbox = []
+    input_sbox[0] = temp[:6]
+    input_sbox[1] = temp[6:12]
+    input_sbox[2] = temp[12:18]
+    input_sbox[3] = temp[18:24]
+    input_sbox[4] = temp[24:30]
+    input_sbox[5] = temp[30:36]
+    input_sbox[6] = temp[36:42]
+    input_sbox[7] = temp[42:]
+
+    output_sbox = []
+    for i in range(0, 8):
+        output_sbox[i] = sbox_substitution(input_sbox[i], current_round)
+    pre_permuted_result = []
+    pre_permuted_result[:4] = output_sbox[0]
+    pre_permuted_result[4:8] = output_sbox[1]
+    pre_permuted_result[8:12] = output_sbox[2]
+    pre_permuted_result[12:16] = output_sbox[3]
+    pre_permuted_result[16:20] = output_sbox[4]
+    pre_permuted_result[20:24] = output_sbox[5]
+    pre_permuted_result[24:28] = output_sbox[6]
+    pre_permuted_result[28:] = output_sbox[7]
+
+    result = fFunctionPermutation(pre_permuted_result)
+    return result
+
+##functions used for Key Schedule##
+
+
 
 #initial key permutation
 
@@ -129,9 +203,63 @@ def RoundKeyPermutation(roundkey):
     permutatedRoundKey = np.zeros((1,48))
     PC_2_1d = PC_2.flatten()
     for i in range(0,48):
-        initPermutatedKey[i] = key[PC_2_1d[i]]
+        permutatedRoundKey[i] = roundkey[PC_2_1d[i]]
     print(permutatedRoundKey)
     return permutatedRoundKey
+
+#entire DES Key Schedule
+
+
+def KeySchedule(key):
+    key = initialKeyPermutation(key)
+    c = []
+    d = []
+    roundKeys = []
+    c[0] = key[:int((len(key)/2))]
+    d[0] = key[int((len(key)/2)):]
+    for i in range(1,16):
+        if i==1 or i == 2 or i == 9 or i == 16:
+           c[i]= np.left_shift(c[i-1],1)
+           d[i]= np.left_shift(d[i-1],1)
+           roundKeys[i] = RoundKeyPermutation(int(str(c[i]) + str(d[i]), 2))
+
+        else:
+           c[i] = np.left_shift(c[i-1],2)
+           d[i] = np.left_shift(d[i-1],2)
+           roundKeys[i] = RoundKeyPermutation(int(str(c[i]) + str(d[i]), 2))
+    return roundKeys
+
+#entire Feistel structure -- main DES
+
+def feistel(plaintext, key):
+    roundkeys = KeySchedule(key)
+    L = []
+    R = []
+    L[0] = initPermutation(plaintext)[:int((len(key)/2))]
+    R[0] = initPermutation(plaintext)[int((len(key)/2)):]
+    for i in range(1,16):
+        L[i]=R[i-1]
+        R[i]=L[i-1]^fFunction(R[i-1], roundkeys[i], i)
+    return finalPermutation(int(str(R[16]) + str(L[16]), 2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
