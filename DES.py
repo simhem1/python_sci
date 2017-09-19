@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
 
+#Input: plaintext = 64bit list
+
 ##Permutation matrices##
 #Create initial permutation matrix
 
@@ -70,8 +72,66 @@ Sbox_8 = np.array([[13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7], [1,15,13,8,10,3,7,4,
 
 
 
-print(IP)
-print(IP_inv)
-print(E)
-print(np.array(P))
-print(np.array(Sbox_1))
+#print(IP)
+#print(IP_inv)
+#print(E)
+#print(np.array(P))
+#print(np.array(Sbox_1))
+
+# initial permutation
+
+def initPermutation(plaintext):
+    plaintext_initpermutated = np.zeros((1,64))
+    IP_1d=IP.flatten()
+    for i in range(0,64):
+        plaintext_initpermutated[i]  = plaintext[IP_1d[i]]
+    print(plaintext_initpermutated)
+    return plaintext_initpermutated
+
+# final permutation
+
+def finalPermutation(input):
+    ciphertext = np.zeros((1,64))
+    IP_inv_1d=IP_inv.flatten()
+    for i in range(0,64):
+        ciphertext[i] = input[IP_inv_1d[i]]
+    print(ciphertext)
+    return ciphertext
+
+# expansion permutation
+# Input:32bit Output:48bit
+
+def expansionPermutation(input):
+    expanded_input = np.zeros((1,48))
+    E_1d = E.flatten()
+    for i in range(0,48):
+        expanded_input[i] = input[E_1d[i]]
+    print(expanded_input)
+    return expanded_input
+
+
+##Key Schedule##
+
+#initial key permutation
+
+def initialKeyPermutation(key):
+    initPermutatedKey = np.zeros((1,56))
+    PC_1_1d = PC_1.flatten()
+    for i in range(0,56):
+        initPermutatedKey[i] = key[PC_1_1d[i]]
+    print(initPermutatedKey)
+    return initPermutatedKey
+
+#round key permutation
+
+
+def RoundKeyPermutation(roundkey):
+    permutatedRoundKey = np.zeros((1,48))
+    PC_2_1d = PC_2.flatten()
+    for i in range(0,48):
+        initPermutatedKey[i] = key[PC_2_1d[i]]
+    print(permutatedRoundKey)
+    return permutatedRoundKey
+
+
+
