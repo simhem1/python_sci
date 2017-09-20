@@ -40,4 +40,5 @@ TypeError: string indices must be integers
 #####################
 I did not finish yet, a string to binary converter will be added today
 Yesterday I focused on the internal DES structure
+Btw please excuse that I am not that fast as you due to my lack of python experience
 
