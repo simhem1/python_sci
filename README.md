@@ -1,7 +1,12 @@
 # python_sci
 
 Can you add some examples for how to use your implementation? 
-I want to give password , let's say "foobar" into your algorithm , and i want to get encrypted password. Can you write here , how I can do this ? 
+I want to give password , let's say "foobar" into your algorithm , and i want to get encrypted password. Can you write here , how I can do this ?
+
+## The DES algorithm takes a 64bit/8bytes-bitstring as input, operates on it and returns it, i.e. one has to split the plaintext message(here: "foobar") into 8byte pieces (padding if needed) with a proper encoding format, take it as
+input for the algorithm and decode the output of the algorithm to get the ciphertext(here: encrypt("foobar")).
+There are several modes of operation, one of them is the so-called ECB mode where the ciphertext is created as following: ciphertext = encrypt(plaintext[:64]) + encrypt(plaintext[64:128] + ...
+(encrypting blockwise and concatenating the encrypted blocks). I think we should go for this mode as it is the easiest one when it comes to implementation even if it is not first choice under crypto aspects
 
 
 Btw I have completed my part , i have to only comment my code and i am waiting for your code in order to create login page. And maybe i will create some extra apps into this , in order to get 100% :) 

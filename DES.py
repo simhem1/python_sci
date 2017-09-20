@@ -242,6 +242,27 @@ def feistel(plaintext, key):
         R[i]=L[i-1]^fFunction(R[i-1], roundkeys[i], i)
     return finalPermutation(int(str(R[16]) + str(L[16]), 2))
 
+#plaintext parser
+
+def parse_plaintext(plaintext):
+    char_list = list(plaintext)
+    ascii_list = []
+    for i in range(0, len(char_list)):
+        ascii_list[i]  = char_list[i].encode(encoding='ascii')
+    print(ascii_list)
+    # bin_list = []
+    # for i in range(0, len(ascii_list)):
+    #     for j in range()
+    #     bin_list[i] =
+
+
+
+
+
+
+
+
+
 
 
 
