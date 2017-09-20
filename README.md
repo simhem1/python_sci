@@ -37,8 +37,15 @@ Traceback (most recent call last):
     ciphertext[i] = input[IP_inv_1d[i]]
 TypeError: string indices must be integers
 
-#####################
-I did not finish yet, a string to binary converter will be added today
-Yesterday I focused on the internal DES structure
-Btw please excuse that I am not that fast as you due to my lack of python experience
+##################### <br/>
+I did not finish yet, a string to binary converter will be added today <br/>
+Yesterday I focused on the internal DES structure <br/>
+Btw please excuse that I am not that fast as you due to my lack of python experience  <br/>
+
+<pre>
+<h3>Check this url: https://github.com/edutilos6666/PythonSciStudentProject
+i have committed my project here , you just commit your changes into your repository , i will copy these files, and add
+them into encryption directory of my repository
+</h3>
+</pre>
 
