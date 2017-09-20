@@ -36,3 +36,8 @@ Traceback (most recent call last):
   File "/home/edutilos/PycharmProjects/PythonSciStudentProject/encryption/DES.py", line 98, in finalPermutation
     ciphertext[i] = input[IP_inv_1d[i]]
 TypeError: string indices must be integers
+
+#####################
+I did not finish yet, a string to binary converter will be added today
+Yesterday I focused on the internal DES structure
+
