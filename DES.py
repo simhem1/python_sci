@@ -217,6 +217,7 @@ def KeySchedule(key):
     roundKeys = []
     c[0] = key[:int((len(key)/2))]
     d[0] = key[int((len(key)/2)):]
+    roundKeys[0] = RoundKeyPermutation(int(str(c[0]) + str(d[0]), 2))
     for i in range(1,16):
         if i==1 or i == 2 or i == 9 or i == 16:
            c[i]= np.left_shift(c[i-1],1)
@@ -229,9 +230,9 @@ def KeySchedule(key):
            roundKeys[i] = RoundKeyPermutation(int(str(c[i]) + str(d[i]), 2))
     return roundKeys
 
-#entire Feistel structure -- main DES
+#DES encryption function
 
-def feistel(plaintext, key):
+def encrypt(plaintext, key):
     roundkeys = KeySchedule(key)
     L = []
     R = []
@@ -240,10 +241,12 @@ def feistel(plaintext, key):
     for i in range(1,16):
         L[i]=R[i-1]
         R[i]=L[i-1]^fFunction(R[i-1], roundkeys[i], i)
-    return finalPermutation(int(str(R[16]) + str(L[16]), 2))
+    ciphertext = finalPermutation(int(str(R[16]) + str(L[16]), 2))
+    return ciphertext
 
 #plaintext parser
 
+#TODO: complete plaintext parser
 def parse_plaintext(plaintext):
     char_list = list(plaintext)
     ascii_list = []
@@ -256,10 +259,78 @@ def parse_plaintext(plaintext):
     #     bin_list[i] =
 
 
+#TODO: ciphertext parser
+
+#def parse_ciphertext(ciphertext):
+
+##Decryption##
+
+#functions needed for decryption
 
 
 
+def reverseKeySchedule(key):
+    key = initialKeyPermutation(key)
+    c_decrypt = []
+    d_decrypt = []
+    roundKeys_decryption = []
+    c_decrypt[16] = key[:int((len(key)/2))]
+    d_decrypt[16] = key[int((len(key)/2)):]
+    for i in range(1,16):
+        if i == 2 or i == 9 or i == 15: #TODO: checkout for indices
+           c_decrypt[i]= np.right_shift(c_decrypt[i-1],1)
+           d_decrypt[i]= np.right_shift(d_decrypt[i-1],1)
+           roundKeys_decryption[i] = RoundKeyPermutation(int(str(c_decrypt[i]) + str(d_decrypt[i]), 2))
 
+        else:                           #TODO: checkout for indices
+           c_decrypt[i] = np.right_shift(c_decrypt[i-1],2)
+           d_decrypt[i] = np.right_shift(d_decrypt[i-1],2)
+           roundKeys_decryption[i] = RoundKeyPermutation(int(str(c_decrypt[i]) + str(d_decrypt[i]), 2))
+    return roundKeys_decryption
+
+
+
+def decrypt(ciphertext, key):
+    roundkeys_decryption= KeySchedule(key)
+    L_decryption = []
+    R_decryption = []
+    L_decryption[0] = initPermutation(ciphertext)[:int((len(key)/2))]
+    R_decryption[0] = initPermutation(ciphertext)[int((len(key)/2)):]
+    for i in range(1,17):
+        L_decryption[i]=R_decryption[i-1]
+        R_decryption[i]=L_decryption[i-1]^fFunction(R_decryption[i-1], roundkeys_decryption[i], i)
+    plaintext = finalPermutation(int(str(R_decryption[16]) + str(L_decryption[16]), 2))
+    return plaintext
+
+
+def tripleDES_EDE_encryption(plaintext, key):
+    key1 = key
+    key2 = []
+    key3 = []
+    for i in range(0, len(key)):
+        if key1[i] == 0:
+            key2[i]=1
+        else:
+            key2[i]=0
+    for i in range(0, len(key)):
+        key3[i] = key2[i]
+
+    ciphertext = encrypt(decrypt(encrypt(plaintext, key1), key2), key3)
+    return ciphertext
+def tripleDES_EDE_decryption(ciphertext, key):
+    key1 = key
+    key2 = []
+    key3 = []
+    for i in range(0, len(key)):
+        if key1[i] == 0:
+            key2[i] = 1
+        else:
+            key2[i] = 0
+    for i in range(0, len(key)):
+        key3[i] = key2[i]
+
+    plaintext = decrypt(encrypt(decrypt(ciphertext,key3),key2),key1)
+    return plaintext
 
 
 
